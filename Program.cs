@@ -3,6 +3,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Numerics;
+using System.Xml;
+using Formatting = Newtonsoft.Json.Formatting;
 
 namespace CreatingABasketballTeamJSON
 {
@@ -14,7 +18,7 @@ namespace CreatingABasketballTeamJSON
 
             const int MaxStatsEntryValue = 100;
 
-            string[] teamCommandsExampleJSONStringArray = new string[]
+            string[] teamCommandsJSONStringArray = new string[]
             {
                 @"
                     [
@@ -48,9 +52,9 @@ namespace CreatingABasketballTeamJSON
                 "
             };
 
-            foreach (string teamCommandsExampleJSONString in teamCommandsExampleJSONStringArray)
+            foreach (string teamCommandsJSONString in teamCommandsJSONStringArray)
             {
-                JArray deserializedTeamCommandsJArray = JArray.Parse(teamCommandsExampleJSONString);
+                JArray deserializedTeamCommandsJArray = JArray.Parse(teamCommandsJSONString);
 
                 string[] teamCommands = deserializedTeamCommandsJArray
                     .Select(command => command.ToString())
@@ -60,7 +64,6 @@ namespace CreatingABasketballTeamJSON
 
                 TeamStats teamStats = new TeamStats();
 
-                List<Team> teams = new List<Team>();
 
                 foreach (var teamCommand in teamCommands)
                 {
@@ -78,14 +81,14 @@ namespace CreatingABasketballTeamJSON
                                 continue;
                             }
 
-                            if (teams.Any(t => t.Name == teamName))
+                            if (team != null)
                             {
                                 teamStats.Errors.Add($"The team is already created as {teamName}.");
                                 continue;
                             }
 
                             team = new(teamName);
-                            teams.Add(team);
+
                             break;
                         case "Add":
                             if (team == null)
@@ -109,7 +112,6 @@ namespace CreatingABasketballTeamJSON
                                     int dribble = int.Parse(teamCommandTokens[5]);
                                     int passes = int.Parse(teamCommandTokens[6]);
                                     int shooting = int.Parse(teamCommandTokens[7]);
-
                                     Stats playerStats = new(endurance, sprint, dribble, passes, shooting);
 
                                     Player playerToFind = team.Players.FirstOrDefault(p => p.Name == playerName);
@@ -120,11 +122,33 @@ namespace CreatingABasketballTeamJSON
                                         continue;
                                     }
 
-                                    int playerEndurance = int.Parse(teamCommandTokens[3]);
-
-                                    if (playerEndurance < MinStatsEntryValue || playerEndurance > MaxStatsEntryValue)
+                                    if (endurance < MinStatsEntryValue || endurance > MaxStatsEntryValue)
                                     {
                                         teamStats.Errors.Add($"Endurance should be between {MinStatsEntryValue} and {MaxStatsEntryValue}.");
+                                        continue;
+                                    }
+
+                                    if (sprint < MinStatsEntryValue || sprint > MaxStatsEntryValue)
+                                    {
+                                        teamStats.Errors.Add($"Sprint should be between {MinStatsEntryValue} and {MaxStatsEntryValue}.");
+                                        continue;
+                                    }
+
+                                    if (dribble < MinStatsEntryValue || dribble > MaxStatsEntryValue)
+                                    {
+                                        teamStats.Errors.Add($"Dribble should be between {MinStatsEntryValue} and {MaxStatsEntryValue}.");
+                                        continue;
+                                    }
+
+                                    if (passes < MinStatsEntryValue || passes > MaxStatsEntryValue)
+                                    {
+                                        teamStats.Errors.Add($"Passes should be between {MinStatsEntryValue} and {MaxStatsEntryValue}.");
+                                        continue;
+                                    }
+
+                                    if (shooting < MinStatsEntryValue || shooting > MaxStatsEntryValue)
+                                    {
+                                        teamStats.Errors.Add($"Shooting should be between {MinStatsEntryValue} and {MaxStatsEntryValue}.");
                                         continue;
                                     }
 
@@ -175,7 +199,6 @@ namespace CreatingABasketballTeamJSON
                             break;
                     }
                 }
-                teams = new List<Team>();
             }
         }
     }
